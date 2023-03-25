@@ -1,4 +1,5 @@
 using LanchesMacBurger.Context;
+using LanchesMacBurger.Models;
 using LanchesMacBurger.Repositories;
 using LanchesMacBurger.Repositories.Interfaces;
 using Microsoft.AspNetCore.Builder;
@@ -32,6 +33,7 @@ namespace LanchesMacBurger
             services.AddMemoryCache();
             services.AddSession();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped(sp => CarrinhoCompra.GetCarrinho(sp));
 
             services.AddControllersWithViews();
         }

@@ -1,5 +1,6 @@
 ﻿using LanchesMacBurger.Context;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -61,6 +62,59 @@ namespace LanchesMacBurger.Models
             }
 
             _context.SaveChanges();
+        }
+
+        public void RemoverDoCarrinho(Lanche lanche)
+        {
+            var carrinhoCompraItem = _context.CarrinhoCompraItens.SingleOrDefault(
+                    s => s.Lanche.LancheId == lanche.LancheId &&
+                         s.CarrinhoCompraId == CarrinhoCompraId);
+
+            //var quantidadeLocal = 0;
+
+            if (carrinhoCompraItem != null)
+            {
+                if (carrinhoCompraItem.Quantidade > 1)
+                {
+                    carrinhoCompraItem.Quantidade--;
+                    //quantidadeLocal = carrinhoCompraItem.Quantidade;
+                }
+                else
+                {
+                    _context.CarrinhoCompraItens.Remove(carrinhoCompraItem);
+                }
+                _context.SaveChanges();
+
+                //return quantidadeLocal
+            }
+        }
+
+        public List<CarrinhoCompraItem> GetCarrinhoCompraItems()
+        {
+            return CarrinhoCompraItems ?? (CarrinhoCompraItems = _context
+                                                .CarrinhoCompraItens
+                                                .Where(c => c.CarrinhoCompraId == CarrinhoCompraId)
+                                                .Include(s => s.Lanche)
+                                                .ToList());
+        }
+
+        public void LimparCarrinho()
+        {
+            var carrinhoItens = _context.CarrinhoCompraItens
+                                    .Where(carrinho => carrinho.CarrinhoCompraId == CarrinhoCompraId);
+
+            _context.CarrinhoCompraItens.RemoveRange(carrinhoItens);
+            _context .SaveChanges();
+
+        }
+
+        public decimal GetCarrinhoCompraTotal()
+        {
+            var Total = _context.CarrinhoCompraItens
+                            .Where(c => c.CarrinhoCompraId == CarrinhoCompraId)
+                            .Select(c => c.Lanche.Preco * c.Quantidade).Sum();
+
+            return Total;
         }
 
     }
