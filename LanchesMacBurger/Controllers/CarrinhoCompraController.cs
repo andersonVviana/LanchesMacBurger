@@ -1,6 +1,8 @@
 ﻿using LanchesMacBurger.Models;
 using LanchesMacBurger.Repositories.Interfaces;
+using LanchesMacBurger.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace LanchesMacBurger.Controllers
 {
@@ -17,7 +19,42 @@ namespace LanchesMacBurger.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            var itens = _carrinhoCompra.GetCarrinhoCompraItems();
+            _carrinhoCompra.CarrinhoCompraItems = itens;
+
+            var carrinhoCompraVM = new CarrinhoCompraViewModel
+            {
+                CarrinhoCompra = _carrinhoCompra,
+                CarrinhoCompraTotal = _carrinhoCompra.GetCarrinhoCompraTotal()
+            };
+
+            return View(carrinhoCompraVM);
+        }
+
+        public IActionResult AdicionarItemNoCarrinhoCompra(int lancheId)
+        {
+            var lancheSelecionado = _lancheRepository.Lanches.FirstOrDefault(p => p.LancheId == lancheId);
+
+            if(lancheSelecionado != null)
+            {
+                _carrinhoCompra.AdicionarAoCarrinho(lancheSelecionado);
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        public IActionResult RemoverItemDoCarrinhoCompra(int lancheId)
+        {
+            var lancheSelecionado = _lancheRepository.Lanches
+                                        .FirstOrDefault(p => p.LancheId == lancheId);
+
+            if (lancheSelecionado != null)
+            {
+                _carrinhoCompra.RemoverDoCarrinho(lancheSelecionado);
+            }
+
+            return RedirectToAction("Index");
         }
     }
+
 }

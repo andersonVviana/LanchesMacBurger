@@ -5,6 +5,7 @@ using LanchesMacBurger.Repositories.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +31,10 @@ namespace LanchesMacBurger
             services.AddTransient<ILancheRepository, LancheRepository>();
             services.AddTransient<ICategoriaRepository, CategoriaRepository>();
 
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
+
             services.AddMemoryCache();
             services.AddSession();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -53,6 +58,8 @@ namespace LanchesMacBurger
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            app.UseAuthentication();
 
             app.UseRouting();
             app.UseSession();
